@@ -89,14 +89,17 @@
                 };
             }());
 
+            var render = function(percents) {
+                    setTeacup(percents);
+                    setAmount(percents[0]);
+            };
+
             inputEventStream
                 .filter(function() {
                     return dragging === true;
                 })
                 .subscribe(function(ev) {
-                    var percents = getPercentage(ev.layerY, teacupHeight);
-                    setTeacup(percents);
-                    setAmount(percents[0]);
+                    render(getPercentage(ev.layerY, teacupHeight));
                 });
 
             mouseupStream
@@ -106,10 +109,8 @@
 
             mousedownStream
                 .subscribe(function(ev) {
-                    var percents = getPercentage(ev.layerY, teacupHeight);
-                    setTeacup(percents);
-                    setAmount(percents[0]);
                     dragging = true;
+                    render(getPercentage(ev.layerY, teacupHeight));
                 });
 
             // init my teacup.
