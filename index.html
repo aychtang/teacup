@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Teacup</title>
+        <style>
+        body {
+            background-color: rgb(200, 213, 195);
+        }
+        h1 {
+            text-align: center;
+            font-size: 60px;
+        }
+        .teacup {
+            width: 100px;
+            height: 200px;
+            border: 1px solid black;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -50px;
+            margin-top: -125px;
+            background-color: rgb(253, 253, 245);
+        }
+        .milk {
+            width: 100px;
+        }
+        .tea {
+            width: 100px;
+            background-color: rgb(53, 37, 37);
+        }
+        </style>
+    </head>
+    <body>
+        <h1>How do you like your tea?</h1>
+        <h2 class="amount"></h2>
+        <div class="teacup">
+            <div class="milk"></div>
+            <div class="tea"></div>
+        </div>
+        <script src="app/bower_components/rxjs/rx.lite.js"></script>
+        <script>
+            var dragging = false;
+            var teacup = document.querySelector('.teacup');
+            var teacupHeight = teacup.clientHeight;
+            var inputEventStream = Rx.Observable.fromEvent(teacup, 'mousemove');
+            var mousedownStream = Rx.Observable.fromEvent(teacup, 'mousedown');
+            var mouseupStream = Rx.Observable.fromEvent(teacup, 'mouseup');
+            var mouseoutStream = Rx.Observable.fromEvent(teacup, 'mouseout');
+
+            var getPercentage = function(y, height) {
+                var top = (y / height)*100;
+                return [top, 100 - top];
+            };
+
+            var setAmount = (function() {
+                var amountEl = document.querySelector('.amount');
+                return function(amount) {
+                    amountEl.innerHTML = 'I like my tea ';
+                    var result;
+                    if (amount <= 0) {
+                        result = 'black';
+                    }
+                    else if (amount <= 5) {
+                        result = 'strong like Steve';
+                    }
+                    else if (amount <= 10) {
+                        result = 'strong';
+                    }
+                    else if (amount <= 20) {
+                        result = 'standard';
+                    }
+                    else if (amount <= 40) {
+                        result = 'milky';
+                    }
+                    else {
+                        result = 'with a shit tonne of milk';
+                    }
+                    amountEl.innerHTML += result;
+                    amountEl.innerHTML += '.';
+                };
+            }());
+
+            var setTeacup = (function() {
+                var topEl = document.querySelector('.milk');
+                var bottomEl = document.querySelector('.tea');
+                return function(percents) {
+                    topEl.style.height = teacupHeight * percents[0]/100 + 'px';
+                    bottomEl.style.height = teacupHeight * percents[1]/100 + 'px';
+                };
+            }());
+
+            inputEventStream
+                .filter(function() {
+                    return dragging === true;
+                })
+                .subscribe(function(ev) {
+                    var percents = getPercentage(ev.layerY, teacupHeight);
+                    setTeacup(percents);
+                    setAmount(percents[0]);
+                });
+
+            mouseupStream
+                .subscribe(function(ev) {
+                    dragging = false;
+                });
+
+            mousedownStream
+                .subscribe(function(ev) {
+                    var percents = getPercentage(ev.layerY, teacupHeight);
+                    setTeacup(percents);
+                    setAmount(percents[0]);
+                    dragging = true;
+                });
+
+            // init my teacup.
+            setTeacup([20,80]);
+            setAmount(20);
+        </script>
+    </body>
+</html>

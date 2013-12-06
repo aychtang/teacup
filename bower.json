@@ -1,0 +1,11 @@
+{
+  "name": "teacup",
+  "version": "0.0.0",
+  "authors": [
+    "Howard Tang <tangh@google.com>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "rxjs": "~2.2.9"
+  }
+}
